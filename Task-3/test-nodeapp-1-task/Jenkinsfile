@@ -1,0 +1,55 @@
+pipeline {
+    agent any
+    environment {
+        AWS_ACCOUNT_ID=390144862162
+        AWS_DEFAULT_REGION="us-east-1"
+        IMAGE_REPO_NAME="courseproject123"
+        IMAGE_TAG="latest"
+        REPOSITORY_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}"
+        REMOTE_HOST="10.5.5.26"
+        REMOTE_USER="ubuntu"
+    }
+    stages {
+        stage('Logging into AWS ECR') {
+            steps {
+                script {
+                sh "aws ecr get-login-password — region ${AWS_DEFAULT_REGION} | docker login — username AWS — password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com"
+                }
+            }
+        }
+        stage('Cloning Git') {
+            steps {
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: ' ', url: 'https://github.com/SuhaasNandeesh/courseproject123.git']]])
+            }
+        }
+
+        // Building Docker images
+        stage('Building image') {
+            steps{
+                script {
+                dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        // Uploading Docker images into AWS ECR
+        stage('Pushing to ECR') {
+            steps{
+                script {
+                    sh "docker tag ${IMAGE_REPO_NAME}:${IMAGE_TAG} ${REPOSITORY_URI}:$IMAGE_TAG"
+                    sh "docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+                }
+            }
+        }
+
+        // Deploying to app host instance
+        stage ('Deploy') {
+        steps {
+            sh 'scp deploy.sh ${REMOTE_USER}@${REMOTE_HOST}:~/'
+            sh 'ssh ${REMOTE_USER}@${REMOTE_HOST} "chmod +x deploy.sh"'
+            sh 'ssh ${REMOTE_USER}@${REMOTE_HOST} ./deploy.sh'
+        }
+    }
+    }
+}
+
