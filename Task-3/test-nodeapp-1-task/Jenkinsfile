@@ -48,7 +48,7 @@ pipeline {
         stage ('Deploy') {
         steps {
             sshagent(credentials : ['private-ssh']) {
-                sh 'scp deploy.sh ${REMOTE_USER}@${REMOTE_HOST}:~/'
+                sh 'scp Task-3/test-nodeapp-1-task/deploy.sh ${REMOTE_USER}@${REMOTE_HOST}:~/'
                 sh 'ssh ${REMOTE_USER}@${REMOTE_HOST} "chmod +x deploy.sh"'
                 sh 'ssh ${REMOTE_USER}@${REMOTE_HOST} ./deploy.sh'
             }
