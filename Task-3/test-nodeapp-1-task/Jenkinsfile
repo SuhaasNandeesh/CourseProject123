@@ -20,7 +20,7 @@ pipeline {
         }
         stage('Cloning Git') {
             steps {
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: ' ', url: 'https://github.com/SuhaasNandeesh/courseproject123.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: ' ', url: 'https://github.com/SuhaasNandeesh/CourseProject123.git']]])
             }
         }
 
