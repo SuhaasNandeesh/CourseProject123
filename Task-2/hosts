@@ -1,0 +1,8 @@
+[bastion]
+52.87.237.227 ansible_user=ubuntu 
+[PrivateNodes]
+10.5.5.215 ansible_user=ubuntu 
+10.5.5.26 ansible_user=ubuntu 
+[PrivateNodes:vars]
+
+ansible_ssh_common_args='-o StrictHostKeyChecking=no -o ProxyCommand="ssh -W %h:%p -p 22 ubuntu@52.87.237.227"'
