@@ -27,7 +27,8 @@ pipeline {
         stage('Building image') {
             steps{
                 script {
-                dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}"
+                    sh 'cd /Task-3/test-nodeapp-1-task/'
+                    dockerImage = docker.build "${IMAGE_REPO_NAME}:${IMAGE_TAG}" 
                 }
             }
         }
