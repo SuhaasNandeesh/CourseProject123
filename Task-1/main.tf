@@ -229,28 +229,13 @@ resource "aws_security_group" "public" {
   }
 }
 
-# resource "aws_network_interface" "web-server-nic" {
-#   count           = length(var.nic_private_ips)
-#   subnet_id       = element((aws_subnet.private)[*].id, count.index)
-#   private_ips     = [element(var.nic_private_ips, count.index)]
-#   security_groups = [aws_security_group.private.id]
-# }
-
-
-
-
 resource "aws_instance" "bastion" {
   ami           = var.ami_type
   instance_type = var.ami_instance_type
-  #availability_zone = element(var.azs, 1)
   count                  = 2
   key_name               = var.name
   vpc_security_group_ids = [aws_security_group.bastion.id]
   subnet_id              = element(aws_subnet.public.*.id, count.index)
-  # network_interface {
-  #   device_index         = 0
-  #   network_interface_id = aws_network_interface.web-server-nic[1].id
-  # }
   tags = {
     "Name" = "bastian"
   }
@@ -264,11 +249,6 @@ resource "aws_instance" "Jenkins" {
   key_name               = var.name
   subnet_id              = element(aws_subnet.private.*.id, count.index)
   vpc_security_group_ids = [element(aws_security_group.private.*.id, count.index)]
-
-  # network_interface {
-  #   device_index         = 0
-  #   network_interface_id = aws_network_interface.web-server-nic[1].id
-  # }
   tags = {
     "Name" = "Jenkins"
   }
@@ -282,104 +262,7 @@ resource "aws_instance" "app" {
   key_name               = var.name
   subnet_id              = element(aws_subnet.private.*.id, count.index)
   vpc_security_group_ids = [element(aws_security_group.private.*.id, count.index)]
-  # network_interface {
-  #   device_index         = 0
-  #   network_interface_id = aws_network_interface.web-server-nic[1].id
-  # }
   tags = {
     "Name" = "app"
   }
 }
-
-
-
-# resource "aws_subnet" "subnet-2-pub" {
-#   cidr_block        = "10.0.2.0/24"
-#   vpc_id            = aws_vpc.cp-vpc.id
-#   availability_zone = "us-east-1b"
-#   tags = {
-#     "Name" = "$(var.name)"
-#   }
-# }
-
-# resource "aws_route_table_association" "b" {
-#   subnet_id      = aws_subnet.subnet-2-pub.id
-#   route_table_id = aws_route_table.cp-route-table.id
-# }
-
-# resource "aws_subnet" "subnet-2-pri" {
-#   cidr_block        = "10.0.2.0/24"
-#   vpc_id            = aws_vpc.cp-vpc.id
-#   availability_zone = "us-east-1b"
-#   tags = {
-#     "Name" = "$(var.name)"
-#   }
-# }
-# resource "aws_security_group_rule" "example" {
-#   type              = "ingress"
-#   from_port         = 22
-#   to_port           = 22
-#   protocol          = "tcp"
-#   cidr_blocks       = [aws_vpc.cp-vpc.cidr_block]
-#   ipv6_cidr_blocks  = [aws_vpc.cp-vpc.ipv6_cidr_block]
-#   security_group_id = aws_security_group.allow_web.id
-# }
-# data "https" "myip" {
-#   url = "https://checkip.amazonaws.com/"
-# }
-# resource "aws_security_group_rule" "bastian" {
-#   type              = "ingress"
-#   from_port         = 22
-#   to_port           = 22
-#   protocol          = "tcp"
-#   cidr_blocks       = ["${chomp(data.https.myip.body)}/32"]
-#   #ipv6_cidr_blocks  = [aws_vpc.cp-vpc.ipv6_cidr_block]
-#   security_group_id = aws_security_group.bastian.id
-# }
-# data "https" "myip" {
-#   url = "https://checkip.amazonaws.com/"
-# }
-# resource "aws_security_group_rule" "bastian" {
-#   type              = "ingress"
-#   from_port         = 22
-#   to_port           = 22
-#   protocol          = "tcp"
-#   cidr_blocks       = ["${chomp(data.https.myip.body)}/32"]
-#   #ipv6_cidr_blocks  = [aws_vpc.cp-vpc.ipv6_cidr_block]
-#   security_group_id = aws_security_group.bastian.id
-# }
-
-# resource "aws_vpc_security_group" "allow_vpc" {
-#   name        = "allow_vpc_traffic"
-#   description = "Allow vpv traffic"
-#   vpc_id      = aws_vpc.cp-vpc.id
-
-#   ingress {
-#     description = "SSH"
-#     from_port   = 22
-#     to_port     = 22
-#     protocol    = "tcp"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-
-#   egress {
-#     from_port   = 0
-#     to_port     = 0
-#     protocol    = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-# }
-
-# resource "aws_network_interface" "web-server-nic-2" {
-#   subnet_id       = aws_subnet.subnet-2-pri.id
-#   private_ips     = ["10.0.2.50"]
-#   security_groups = [aws_security_group.allow_web.id]
-# }
-# resource "aws_eip" "two" {
-#   vpc                       = true
-#   network_interface         = aws_network_interface.web-server-nic-2.id
-#   associate_with_private_ip = "10.0.2.50"
-#   depends_on = [
-#     aws_internet_gateway.cp-igw
-#   ]
-# }

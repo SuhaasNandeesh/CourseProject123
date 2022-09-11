@@ -40,16 +40,6 @@ output "sg-public" {
   value = aws_security_group.public.vpc_id
 }
 
-# output "nic" {
-#   value = aws_network_interface.web-server-nic.*.id
-#   #value = values(aws_network_interface.web-server-nic)[*].id
-# }
-
-# output "eip" {
-#   value = aws_eip.one.*.id
-#   #value = values(aws_eip.one)[*].id
-# }
-
 output "nat" {
   value = ["${aws_nat_gateway.cp-ngw.*.id}"]
 }
